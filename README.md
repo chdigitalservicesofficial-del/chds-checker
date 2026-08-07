@@ -1,1 +1,1 @@
-# chds-checker
+# chds-acc-checker
