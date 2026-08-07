@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHDS ACC CHECKER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a0714;
+    --bg-1:#120a26;
+    --bg-2:#180f33;
+    --glass:rgba(255,255,255,0.055);
+    --glass-hi:rgba(255,255,255,0.10);
+    --glass-border:rgba(255,255,255,0.14);
+    --purple:#9061F9;
+    --purple-soft:#B794FF;
+    --blue:#3E8EF7;
+    --pink:#F754A6;
+    --text:#F3EFFC;
+    --muted:#9C93B8;
+    --muted-dim:#6f6690;
+    --live:#3DF2B0;
+    --down:#FF6B8B;
+    --checking:#FFC15E;
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 12% -8%, rgba(144,97,249,0.35), transparent 60%),
+      radial-gradient(ellipse 800px 600px at 100% 0%, rgba(62,142,247,0.28), transparent 55%),
+      radial-gradient(ellipse 700px 500px at 50% 110%, rgba(247,84,166,0.22), transparent 60%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-2));
+    color:var(--text);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .aurora{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .aurora span{
+    position:absolute; border-radius:50%; filter:blur(90px); opacity:0.35;
+    animation:drift 22s ease-in-out infinite alternate;
+  }
+  .aurora span:nth-child(1){width:520px;height:520px; background:var(--purple); top:-160px; left:-120px; animation-duration:26s;}
+  .aurora span:nth-child(2){width:460px;height:460px; background:var(--blue); top:10%; right:-160px; animation-duration:30s; animation-delay:-6s;}
+  .aurora span:nth-child(3){width:420px;height:420px; background:var(--pink); bottom:-180px; left:30%; animation-duration:24s; animation-delay:-12s;}
+  @keyframes drift{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(40px,60px) scale(1.15);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .aurora span{animation:none;}
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:0 20px 80px;}
+
+  nav{
+    position:sticky; top:14px; z-index:50;
+    margin:14px auto 0;
+    max-width:1120px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    border-radius:100px;
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; letter-spacing:0.02em; font-size:16px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg, var(--purple), var(--blue) 55%, var(--pink));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; color:#0a0714;
+    box-shadow:0 0 18px rgba(144,97,249,0.55);
+  }
+  .brand small{display:block; font-family:'Plus Jakarta Sans'; font-weight:500; font-size:10.5px; letter-spacing:0.14em; color:var(--muted); margin-top:1px; text-transform:uppercase;}
+  .navlinks{display:flex; gap:6px; font-size:13.5px;}
+  .navlinks a{color:var(--muted); text-decoration:none; padding:8px 14px; border-radius:100px; transition:all .2s ease; font-weight:500;}
+  .navlinks a:hover, .navlinks a:focus-visible{color:var(--text); background:var(--glass-hi);}
+  .navlinks a:focus-visible{outline:2px solid var(--purple-soft); outline-offset:2px;}
+
+  header.hero{padding:56px 4px 30px; text-align:left;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--purple-soft); background:rgba(144,97,249,0.12); border:1px solid rgba(144,97,249,0.3);
+    padding:6px 12px; border-radius:100px; margin-bottom:18px;
+  }
+  .dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--live); box-shadow:0 0 8px var(--live); animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:clamp(32px,5vw,52px);
+    line-height:1.05; margin:0 0 14px; letter-spacing:-0.01em;
+    background:linear-gradient(100deg, #fff 10%, var(--purple-soft) 55%, var(--blue) 80%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header.hero p{color:var(--muted); font-size:15.5px; max-width:560px; line-height:1.6; margin:0;}
+
+  .checker{
+    margin-top:34px;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    padding:26px;
+  }
+  .checker-grid{display:grid; grid-template-columns:1.2fr 0.6fr 1fr auto; gap:12px;}
+  @media (max-width:820px){.checker-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){.checker-grid{grid-template-columns:1fr;}}
+  .field label{
+    display:block; font-size:11.5px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:8px;
+  }
+  .field input{
+    width:100%; padding:13px 15px; border-radius:12px;
+    background:rgba(255,255,255,0.045); border:1px solid var(--glass-border);
+    color:var(--text); font-family:'JetBrains Mono', monospace; font-size:14px;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .field input::placeholder{color:var(--muted-dim); font-family:'Plus Jakarta Sans';}
+  .field input:focus-visible{outline:none; border-color:var(--purple-soft); background:rgba(144,97,249,0.08); box-shadow:0 0 0 3px rgba(144,97,249,0.18);}
+  .btn-check{
+    align-self:end;
+    padding:13px 26px; border:none; border-radius:12px; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; letter-spacing:0.01em;
+    background:linear-gradient(120deg, var(--purple), var(--blue) 60%, var(--pink));
+    color:#0a0714;
+    box-shadow:0 8px 24px rgba(144,97,249,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .btn-check:hover{transform:translateY(-1px); box-shadow:0 12px 30px rgba(144,97,249,0.5);}
+  .btn-check:active{transform:translateY(0);}
+  .btn-check:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+  .btn-check:disabled{opacity:.6; cursor:progress; transform:none;}
+  .hint{margin-top:14px; font-size:12.5px; color:var(--muted-dim); line-height:1.6;}
+  .hint code{background:rgba(255,255,255,0.06); padding:1px 6px; border-radius:5px; font-family:'JetBrains Mono';}
+
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px;}
+  @media (max-width:600px){.stats{grid-template-columns:1fr;}}
+  .stat{background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:18px 20px; backdrop-filter:blur(18px);}
+  .stat .num{font-family:'Space Grotesk'; font-weight:700; font-size:28px;}
+  .stat .lbl{font-size:12px; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; margin-top:2px;}
+  .stat.live .num{color:var(--live);}
+  .stat.down .num{color:var(--down);}
+  .stat.total .num{background:linear-gradient(100deg,var(--purple-soft),var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+
+  section.history{margin-top:46px;}
+  .history-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap;}
+  .history-head h2{font-family:'Space Grotesk'; font-size:20px; margin:0; font-weight:600;}
+  .history-head span{font-size:12.5px; color:var(--muted-dim); font-family:'JetBrains Mono';}
+
+  .table-card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius);
+    backdrop-filter:blur(22px) saturate(160%); overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .table-toolbar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    padding:16px 22px; border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02);
+  }
+  .tb-search{flex:1 1 180px; position:relative; min-width:150px;}
+  .tb-search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px;height:14px; color:var(--muted-dim); pointer-events:none;}
+  .tb-search input{
+    width:100%; padding:9px 12px 9px 32px; border-radius:10px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--glass-border);
+    color:var(--text); font-size:13px; font-family:'Plus Jakarta Sans';
+  }
+  .tb-search input::placeholder{color:var(--muted-dim);}
+  .tb-search input:focus-visible{outline:none; border-color:var(--purple-soft);}
+  select.tb-select{
+    padding:9px 10px; border-radius:10px; background:rgba(20,12,40,0.9); border:1px solid var(--glass-border);
+    color:var(--text); font-size:12.5px; font-family:'Plus Jakarta Sans'; cursor:pointer;
+  }
+  select.tb-select:focus-visible{outline:none; border-color:var(--purple-soft);}
+  .tb-btn{
+    padding:9px 14px; border-radius:10px; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.04); color:var(--muted); font-size:12.5px; font-weight:600;
+    cursor:pointer; transition:all .15s ease; font-family:'Plus Jakarta Sans'; white-space:nowrap;
+  }
+  .tb-btn:hover:not(:disabled){background:var(--glass-hi); color:var(--text); border-color:var(--purple-soft);}
+  .tb-btn:focus-visible{outline:2px solid var(--purple-soft); outline-offset:1px;}
+  .tb-btn:disabled{opacity:.35; cursor:not-allowed;}
+  .tb-btn.danger:hover:not(:disabled){border-color:var(--down); color:var(--down);}
+  .tb-divider{width:1px; align-self:stretch; background:var(--glass-border); margin:0 2px;}
+  .tb-spacer{flex:1 1 auto;}
+  .tb-count{font-size:11.5px; color:var(--muted-dim); font-family:'JetBrains Mono'; white-space:nowrap;}
+
+  input[type=checkbox]{width:16px;height:16px; accent-color:var(--purple); cursor:pointer;}
+
+  .row{
+    display:grid;
+    grid-template-columns: 24px 2fr 1fr 0.8fr 1.1fr 1.1fr auto;
+    gap:10px; align-items:center;
+    padding:16px 22px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    transition:background .2s ease;
+  }
+  .row.head{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted-dim);
+    font-weight:600; padding-top:14px; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.1);
+  }
+  .row:not(.head):hover{background:rgba(255,255,255,0.03);}
+  .row:last-child{border-bottom:none;}
+
+  .profile-cell{display:flex; align-items:center; gap:12px; min-width:0;}
+  .avatar{
+    width:38px;height:38px;border-radius:10px; flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk'; font-weight:700; font-size:14px; color:#0a0714;
+    background:linear-gradient(135deg, var(--purple-soft), var(--pink));
+  }
+  .profile-text{min-width:0;}
+  .profile-text .name{font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .profile-text .link{font-size:11.5px; color:var(--muted-dim); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; max-width:220px;}
+  .note-trigger{
+    margin-top:5px; font-size:11.5px; color:var(--muted-dim); background:none; border:none; padding:0;
+    cursor:pointer; display:inline-flex; align-items:center; gap:5px; font-family:'Plus Jakarta Sans';
+    max-width:260px; text-align:left; transition:color .15s ease;
+  }
+  .note-trigger svg{width:12px; height:12px; flex-shrink:0; opacity:.7;}
+  .note-trigger .txt{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .note-trigger.empty{opacity:.6; font-style:italic;}
+  .note-trigger:hover, .note-trigger:focus-visible{color:var(--purple-soft);}
+  .note-trigger:focus-visible{outline:2px solid var(--purple-soft); outline-offset:2px; border-radius:4px;}
+  .note-trigger.has-note{color:var(--pink);}
+
+  /* --- notepad modal --- */
+  .notepad-overlay{
+    position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center;
+    background:rgba(5,2,15,0.65); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    padding:20px;
+  }
+  .notepad-overlay.open{display:flex;}
+  .notepad-modal{
+    width:min(480px, 100%); max-height:min(560px, 90vh); display:flex; flex-direction:column;
+    background:linear-gradient(165deg, rgba(28,17,56,0.97), rgba(10,6,20,0.97));
+    border:1px solid var(--glass-border); border-radius:20px; overflow:hidden;
+    box-shadow:0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    animation:notepad-in .18s ease;
+  }
+  @keyframes notepad-in{from{opacity:0; transform:translateY(8px) scale(.98);} to{opacity:1; transform:none;}}
+  .notepad-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:18px 20px; border-bottom:1px solid rgba(255,255,255,0.08);
+    background:linear-gradient(120deg, rgba(144,97,249,0.12), rgba(247,84,166,0.08));
+  }
+  .notepad-head .title{min-width:0;}
+  .notepad-head .title .h{font-family:'Space Grotesk'; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .notepad-head .title .s{font-family:'JetBrains Mono'; font-size:11px; color:var(--muted-dim); margin-top:2px;}
+  .notepad-close{
+    width:30px; height:30px; border-radius:9px; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.05); color:var(--muted); cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; transition:all .15s ease;
+  }
+  .notepad-close:hover{background:var(--glass-hi); color:var(--text); border-color:var(--pink);}
+  .notepad-close:focus-visible{outline:2px solid var(--purple-soft); outline-offset:1px;}
+  .notepad-close svg{width:14px; height:14px;}
+  .notepad-body{flex:1; overflow:hidden; display:flex;}
+  #notepad-textarea{
+    flex:1; width:100%; border:none; resize:none; outline:none;
+    padding:18px 22px; box-sizing:border-box;
+    background-color:transparent;
+    background-image:repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(255,255,255,0.09) 28px);
+    line-height:28px; font-family:'Plus Jakarta Sans'; font-size:14px; color:var(--text);
+  }
+  #notepad-textarea::placeholder{color:var(--muted-dim); font-style:italic;}
+  .notepad-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 20px; border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .notepad-foot .autosave{font-size:11px; color:var(--muted-dim); font-family:'JetBrains Mono'; display:flex; align-items:center; gap:6px;}
+  .notepad-foot .autosave .pip{width:5px;height:5px;border-radius:50%; background:var(--live); box-shadow:0 0 6px var(--live);}
+  .notepad-done{
+    padding:9px 20px; border:none; border-radius:10px; cursor:pointer;
+    font-family:'Space Grotesk'; font-weight:600; font-size:13px;
+    background:linear-gradient(120deg, var(--purple), var(--blue) 60%, var(--pink)); color:#0a0714;
+    transition:transform .15s ease;
+  }
+  .notepad-done:hover{transform:translateY(-1px);}
+  .notepad-done:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+
+  .status-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11.5px; font-weight:600; letter-spacing:0.03em;
+    padding:6px 11px; border-radius:100px; width:fit-content;
+    font-family:'JetBrains Mono';
+  }
+  .status-badge .sig{display:inline-flex; align-items:flex-end; gap:1.5px; height:9px;}
+  .status-badge .sig i{display:block; width:2.5px; border-radius:1px;}
+  .status-live{background:rgba(61,242,176,0.12); color:var(--live); border:1px solid rgba(61,242,176,0.3);}
+  .status-live .sig i{background:var(--live);}
+  .status-down{background:rgba(255,107,139,0.12); color:var(--down); border:1px solid rgba(255,107,139,0.3);}
+  .status-down .sig i{background:var(--down); opacity:.4;}
+  .status-checking{background:rgba(255,193,94,0.12); color:var(--checking); border:1px solid rgba(255,193,94,0.3);}
+  .status-checking .sig i{background:var(--checking); animation:sigwave 1s ease-in-out infinite;}
+  .status-checking .sig i:nth-child(2){animation-delay:.15s;}
+  .status-checking .sig i:nth-child(3){animation-delay:.3s;}
+  @keyframes sigwave{0%,100%{opacity:.3;} 50%{opacity:1;}}
+
+  .price-cell{font-family:'JetBrains Mono'; font-size:13.5px; color:var(--purple-soft);}
+  .time-cell{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted); line-height:1.5;}
+  .time-cell .date{color:var(--text); font-size:12.5px;}
+
+  .row-actions{display:flex; gap:6px; justify-content:flex-end;}
+  .icon-btn{
+    width:32px; height:32px; border-radius:9px; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.04); color:var(--muted); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .15s ease;
+  }
+  .icon-btn:hover{background:var(--glass-hi); color:var(--text); border-color:var(--purple-soft);}
+  .icon-btn:focus-visible{outline:2px solid var(--purple-soft); outline-offset:1px;}
+  .icon-btn svg{width:15px;height:15px;}
+
+  .empty{padding:60px 30px; text-align:center; color:var(--muted-dim);}
+  .empty .glyph{font-size:34px; margin-bottom:12px; opacity:.5;}
+  .empty p{margin:0; font-size:13.5px;}
+
+  footer{margin-top:50px; text-align:center; color:var(--muted-dim); font-size:12px; font-family:'JetBrains Mono';}
+  footer a{color:var(--purple-soft);}
+
+  @media (max-width:820px){
+    .row{grid-template-columns: 20px 1.4fr 1fr 1fr; grid-template-areas:"select profile status status" "notes notes notes notes" "price time actions actions"; row-gap:8px;}
+    .row.head{display:none;}
+    .row > input[type=checkbox]{grid-area:select;}
+    .profile-cell{grid-area:profile;}
+    .status-badge{grid-area:status; justify-self:end;}
+    .price-cell{grid-area:price;}
+    .time-cell{grid-area:time;}
+    .row-actions{grid-area:actions; justify-self:end;}
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora"><span></span><span></span><span></span></div>
+
+<nav>
+  <div class="brand">
+    <div class="mark">C</div>
+    <div>
+      CHDS ACC CHECKER
+      <small>Public Status Lookup</small>
+    </div>
+  </div>
+  <div class="navlinks">
+    <a href="#check">Check</a>
+    <a href="#history">History</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero" id="check">
+    <div class="eyebrow"><span class="dot-pulse"></span> Public profile status &middot; not a login tool</div>
+    <h1>Is that profile still there?</h1>
+    <p>Paste a Facebook username or numeric UID to check whether the public profile link is live or down. Every check is logged below with the time, date, price, and last-checked status.</p>
+  </header>
+
+  <div class="checker">
+    <div class="checker-grid">
+      <div class="field">
+        <label for="input-handle">Username or UID</label>
+        <input id="input-handle" type="text" placeholder="e.g. zuck  or  4">
+      </div>
+      <div class="field">
+        <label for="input-price">Price (optional)</label>
+        <input id="input-price" type="text" placeholder="e.g. 250">
+      </div>
+      <div class="field">
+        <label for="input-notes">Note (optional)</label>
+        <input id="input-notes" type="text" placeholder="e.g. from marketplace">
+      </div>
+      <button class="btn-check" id="btn-check">Check status</button>
+    </div>
+    <p class="hint">
+      This runs against a placeholder checker so you can see the UI end to end &mdash; it does not call Facebook. Facebook has no public API for this, so the real check has to run server-side (fetch the public profile URL and read whether it resolves or returns "content not available"). Swap the <code>checkProfileStatus()</code> function near the bottom of this file for a call to your own backend/proxy to make it live. History lives in memory only in this preview &mdash; use <b>Export JSON</b> below before closing the tab, and <b>Import JSON</b> to bring it back next time.
+    </p>
+  </div>
+
+  <div class="stats">
+    <div class="stat total"><div class="num" id="stat-total">0</div><div class="lbl">Tracked</div></div>
+    <div class="stat live"><div class="num" id="stat-live">0</div><div class="lbl">Live</div></div>
+    <div class="stat down"><div class="num" id="stat-down">0</div><div class="lbl">Down</div></div>
+  </div>
+
+  <section class="history" id="history">
+    <div class="history-head">
+      <h2>Check history</h2>
+      <span id="history-count">0 entries</span>
+    </div>
+    <div class="table-card">
+
+      <div class="table-toolbar">
+        <div class="tb-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="tb-search-input" type="text" placeholder="Search username, UID or link…">
+        </div>
+        <select class="tb-select" id="tb-filter-status" title="Filter by status">
+          <option value="all">All statuses</option>
+          <option value="live">Live only</option>
+          <option value="down">Down only</option>
+        </select>
+        <select class="tb-select" id="tb-sort" title="Sort by">
+          <option value="newest">Newest added</option>
+          <option value="oldest">Oldest added</option>
+          <option value="last-checked">Last checked</option>
+          <option value="price-high">Price: high to low</option>
+          <option value="price-low">Price: low to high</option>
+        </select>
+        <select class="tb-select" id="tb-auto" title="Auto-recheck interval">
+          <option value="0">Auto-recheck: off</option>
+          <option value="900000">Every 15 min</option>
+          <option value="1800000">Every 30 min</option>
+          <option value="3600000">Every 1 hour</option>
+        </select>
+
+        <div class="tb-spacer"></div>
+
+        <span class="tb-count" id="tb-selected-count">0 selected</span>
+        <button class="tb-btn" id="tb-recheck-selected" disabled>Recheck selected</button>
+        <button class="tb-btn danger" id="tb-delete-selected" disabled>Delete selected</button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" id="tb-export-csv">Export CSV</button>
+        <button class="tb-btn" id="tb-export-json">Export JSON</button>
+        <button class="tb-btn" id="tb-import-json">Import JSON</button>
+        <input type="file" id="tb-import-file" accept="application/json" style="display:none;">
+      </div>
+
+      <div class="row head">
+        <input type="checkbox" id="select-all" title="Select all visible">
+        <div>Profile</div>
+        <div>Status</div>
+        <div>Price</div>
+        <div>Last checked</div>
+        <div>Date added</div>
+        <div></div>
+      </div>
+      <div id="table-body"></div>
+    </div>
+  </section>
+
+  <footer>CHDS ACC CHECKER &mdash; personal tracking tool &middot; checks are simulated in this preview</footer>
+</div>
+
+<div class="notepad-overlay" id="notepad-overlay">
+  <div class="notepad-modal" role="dialog" aria-modal="true" aria-labelledby="notepad-title">
+    <div class="notepad-head">
+      <div class="title">
+        <div class="h" id="notepad-title">Note</div>
+        <div class="s" id="notepad-subtitle">&mdash;</div>
+      </div>
+      <button class="notepad-close" id="notepad-close" title="Close" aria-label="Close notepad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="notepad-body">
+      <textarea id="notepad-textarea" placeholder="Write anything about this profile — where it came from, what to watch for, follow-ups…"></textarea>
+    </div>
+    <div class="notepad-foot">
+      <span class="autosave"><span class="pip"></span>Autosaves as you type</span>
+      <button class="notepad-done" id="notepad-done">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   PLACEHOLDER CHECK FUNCTION
+   Facebook has no public API for "does this profile exist".
+   The only real way to check is server-side: fetch the public
+   profile URL and inspect the response (HTTP status / redirect /
+   page text like "This content isn't available"). That has to run
+   on a server or proxy you control, not from a browser, since
+   facebook.com blocks cross-origin requests from other sites.
+
+   Replace this function with a call to your own backend, e.g.:
+
+     async function checkProfileStatus(link) {
+       const res = await fetch("https://your-backend.example.com/check?url=" + encodeURIComponent(link));
+       const data = await res.json();
+       return data.status; // "live" or "down"
+     }
+
+   Below is a simulated version so you can see the full UI/UX now.
+------------------------------------------------------------------*/
+function checkProfileStatus(link) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(Math.random() > 0.25 ? "live" : "down");
+    }, 900 + Math.random() * 800);
+  });
+}
+
+/* ---------------------------------------------------------------
+   State — in-memory only (no localStorage available in this
+   preview environment). Use Export JSON / Import JSON to carry
+   history between sessions until this is wired to a real backend.
+------------------------------------------------------------------*/
+let entries = [];
+let idCounter = 1;
+let selected = new Set();
+let searchTerm = '';
+let statusFilter = 'all';
+let sortBy = 'newest';
+let autoRecheckHandle = null;
+
+const els = {
+  handle: document.getElementById('input-handle'),
+  price: document.getElementById('input-price'),
+  notes: document.getElementById('input-notes'),
+  btn: document.getElementById('btn-check'),
+  tbody: document.getElementById('table-body'),
+  statTotal: document.getElementById('stat-total'),
+  statLive: document.getElementById('stat-live'),
+  statDown: document.getElementById('stat-down'),
+  historyCount: document.getElementById('history-count'),
+  search: document.getElementById('tb-search-input'),
+  filterStatus: document.getElementById('tb-filter-status'),
+  sort: document.getElementById('tb-sort'),
+  auto: document.getElementById('tb-auto'),
+  selectAll: document.getElementById('select-all'),
+  selectedCount: document.getElementById('tb-selected-count'),
+  recheckSelectedBtn: document.getElementById('tb-recheck-selected'),
+  deleteSelectedBtn: document.getElementById('tb-delete-selected'),
+  exportCsvBtn: document.getElementById('tb-export-csv'),
+  exportJsonBtn: document.getElementById('tb-export-json'),
+  importJsonBtn: document.getElementById('tb-import-json'),
+  importFile: document.getElementById('tb-import-file'),
+};
+
+function buildLink(handle) {
+  const trimmed = handle.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return `https://facebook.com/profile.php?id=${trimmed}`;
+  }
+  return `https://facebook.com/${trimmed}`;
+}
+
+function fmtDateTime(d) {
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return { date, time };
+}
+
+function initials(str) {
+  const clean = str.replace(/[^a-zA-Z0-9]/g, '');
+  return (clean.slice(0, 2) || '?').toUpperCase();
+}
+
+function statusBadge(status) {
+  if (status === 'checking') {
+    return `<span class="status-badge status-checking"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i></span>Checking</span>`;
+  }
+  if (status === 'live') {
+    return `<span class="status-badge status-live"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i></span>Live</span>`;
+  }
+  return `<span class="status-badge status-down"><span class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i></span>Down</span>`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function getVisibleEntries() {
+  let list = entries.slice();
+
+  if (searchTerm.trim()) {
+    const q = searchTerm.trim().toLowerCase();
+    list = list.filter(e => e.handle.toLowerCase().includes(q) || e.link.toLowerCase().includes(q));
+  }
+  if (statusFilter !== 'all') {
+    list = list.filter(e => e.status === statusFilter);
+  }
+
+  const priceNum = (e) => {
+    const n = parseFloat(String(e.price).replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? -Infinity : n;
+  };
+
+  switch (sortBy) {
+    case 'oldest': list.sort((a, b) => a.addedAt - b.addedAt); break;
+    case 'last-checked': list.sort((a, b) => b.lastCheckedAt - a.lastCheckedAt); break;
+    case 'price-high': list.sort((a, b) => priceNum(b) - priceNum(a)); break;
+    case 'price-low': list.sort((a, b) => priceNum(a) - priceNum(b)); break;
+    case 'newest':
+    default: list.sort((a, b) => b.addedAt - a.addedAt); break;
+  }
+
+  return list;
+}
+
+function render() {
+  els.statTotal.textContent = entries.length;
+  els.statLive.textContent = entries.filter(e => e.status === 'live').length;
+  els.statDown.textContent = entries.filter(e => e.status === 'down').length;
+  els.historyCount.textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+
+  const visible = getVisibleEntries();
+
+  // prune selections that no longer exist
+  selected = new Set([...selected].filter(id => entries.some(e => e.id === id)));
+  els.selectedCount.textContent = `${selected.size} selected`;
+  els.recheckSelectedBtn.disabled = selected.size === 0;
+  els.deleteSelectedBtn.disabled = selected.size === 0;
+  els.selectAll.checked = visible.length > 0 && visible.every(e => selected.has(e.id));
+  els.selectAll.indeterminate = visible.some(e => selected.has(e.id)) && !els.selectAll.checked;
+
+  if (entries.length === 0) {
+    els.tbody.innerHTML = `
+      <div class="empty">
+        <div class="glyph">&#9679;&#9675;&#9679;</div>
+        <p>No checks yet. Add a username or UID above to get started.</p>
+      </div>`;
+    return;
+  }
+
+  if (visible.length === 0) {
+    els.tbody.innerHTML = `
+      <div class="empty">
+        <div class="glyph">&#9678;</div>
+        <p>Nothing matches your search or filter.</p>
+      </div>`;
+    return;
+  }
+
+  els.tbody.innerHTML = visible.map(e => {
+    const added = fmtDateTime(e.addedAt);
+    const checked = fmtDateTime(e.lastCheckedAt);
+    return `
+      <div class="row" data-id="${e.id}">
+        <input type="checkbox" class="row-select" data-id="${e.id}" ${selected.has(e.id) ? 'checked' : ''}>
+        <div class="profile-cell">
+          <div class="avatar">${initials(e.handle)}</div>
+          <div class="profile-text">
+            <span class="name">${escapeHtml(e.handle)}</span>
+            <a class="link" href="${e.link}" target="_blank" rel="noopener noreferrer">${e.link.replace('https://', '')}</a>
+            <button class="note-trigger ${e.notes ? 'has-note' : 'empty'}" data-action="notepad" data-id="${e.id}" title="Open notepad">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+              <span class="txt">${e.notes ? escapeHtml(e.notes.split('\n')[0].slice(0, 42)) : 'Add a note'}</span>
+            </button>
+          </div>
+        </div>
+        <div>${statusBadge(e.status)}</div>
+        <div class="price-cell">${e.price ? escapeHtml(e.price) : '&mdash;'}</div>
+        <div class="time-cell"><span class="date">${checked.date}</span><br>${checked.time}</div>
+        <div class="time-cell"><span class="date">${added.date}</span><br>${added.time}</div>
+        <div class="row-actions">
+          <button class="icon-btn" title="Recheck" data-action="recheck" data-id="${e.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          </button>
+          <button class="icon-btn" title="Open link" data-action="open" data-id="${e.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </button>
+          <button class="icon-btn" title="Remove" data-action="delete" data-id="${e.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function runCheck(handle, price, notes) {
+  const link = buildLink(handle);
+  const entry = {
+    id: idCounter++,
+    handle,
+    link,
+    price: price || '',
+    notes: notes || '',
+    status: 'checking',
+    addedAt: new Date(),
+    lastCheckedAt: new Date(),
+  };
+  entries.push(entry);
+  render();
+
+  const result = await checkProfileStatus(link);
+  entry.status = result;
+  entry.lastCheckedAt = new Date();
+  render();
+}
+
+async function recheckMany(ids) {
+  const targets = entries.filter(e => ids.includes(e.id));
+  targets.forEach(e => { e.status = 'checking'; });
+  render();
+  await Promise.all(targets.map(async (e) => {
+    const result = await checkProfileStatus(e.link);
+    e.status = result;
+    e.lastCheckedAt = new Date();
+  }));
+  render();
+}
+
+/* ---- add / check ---- */
+els.btn.addEventListener('click', async () => {
+  const handle = els.handle.value.trim();
+  if (!handle) { els.handle.focus(); return; }
+  const price = els.price.value.trim();
+  const notes = els.notes.value.trim();
+  els.btn.disabled = true;
+  els.btn.textContent = 'Checking…';
+  await runCheck(handle, price, notes);
+  els.btn.disabled = false;
+  els.btn.textContent = 'Check status';
+  els.handle.value = '';
+  els.price.value = '';
+  els.notes.value = '';
+  els.handle.focus();
+});
+[els.handle, els.price, els.notes].forEach(input => {
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') els.btn.click(); });
+});
+
+/* ---- search / filter / sort / auto-recheck ---- */
+els.search.addEventListener('input', (e) => { searchTerm = e.target.value; render(); });
+els.filterStatus.addEventListener('change', (e) => { statusFilter = e.target.value; render(); });
+els.sort.addEventListener('change', (e) => { sortBy = e.target.value; render(); });
+els.auto.addEventListener('change', (e) => {
+  if (autoRecheckHandle) { clearInterval(autoRecheckHandle); autoRecheckHandle = null; }
+  const ms = Number(e.target.value);
+  if (ms > 0) {
+    autoRecheckHandle = setInterval(() => {
+      if (entries.length) recheckMany(entries.map(en => en.id));
+    }, ms);
+  }
+});
+
+/* ---- row checkboxes + select all ---- */
+els.selectAll.addEventListener('change', () => {
+  const visible = getVisibleEntries();
+  if (els.selectAll.checked) visible.forEach(e => selected.add(e.id));
+  else visible.forEach(e => selected.delete(e.id));
+  render();
+});
+
+els.tbody.addEventListener('change', (e) => {
+  const cb = e.target.closest('.row-select');
+  if (!cb) return;
+  const id = Number(cb.dataset.id);
+  if (cb.checked) selected.add(id); else selected.delete(id);
+  render();
+});
+
+/* ---- notepad (per-entry, full editable note) ---- */
+const notepad = {
+  overlay: document.getElementById('notepad-overlay'),
+  textarea: document.getElementById('notepad-textarea'),
+  title: document.getElementById('notepad-title'),
+  subtitle: document.getElementById('notepad-subtitle'),
+  closeBtn: document.getElementById('notepad-close'),
+  doneBtn: document.getElementById('notepad-done'),
+  currentId: null,
+};
+
+function openNotepad(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  notepad.currentId = id;
+  notepad.title.textContent = entry.handle;
+  notepad.subtitle.textContent = entry.link.replace('https://', '');
+  notepad.textarea.value = entry.notes || '';
+  notepad.overlay.classList.add('open');
+  setTimeout(() => notepad.textarea.focus(), 10);
+}
+
+function closeNotepad() {
+  notepad.overlay.classList.remove('open');
+  notepad.currentId = null;
+  render();
+}
+
+notepad.textarea.addEventListener('input', () => {
+  if (notepad.currentId == null) return;
+  const entry = entries.find(e => e.id === notepad.currentId);
+  if (entry) entry.notes = notepad.textarea.value;
+});
+notepad.closeBtn.addEventListener('click', closeNotepad);
+notepad.doneBtn.addEventListener('click', closeNotepad);
+notepad.overlay.addEventListener('click', (e) => { if (e.target === notepad.overlay) closeNotepad(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && notepad.overlay.classList.contains('open')) closeNotepad();
+});
+
+/* ---- row actions ---- */
+els.tbody.addEventListener('click', (e) => {
+  const noteBtn = e.target.closest('.note-trigger');
+  if (noteBtn) { openNotepad(Number(noteBtn.dataset.id)); return; }
+
+  const btn = e.target.closest('.icon-btn');
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+  const entry = entries.find(x => x.id === id);
+  if (!entry) return;
+  if (action === 'recheck') recheckMany([id]);
+  if (action === 'open') window.open(entry.link, '_blank', 'noopener,noreferrer');
+  if (action === 'delete') { entries = entries.filter(x => x.id !== id); selected.delete(id); render(); }
+});
+
+/* ---- bulk actions ---- */
+els.recheckSelectedBtn.addEventListener('click', () => {
+  if (selected.size === 0) return;
+  recheckMany([...selected]);
+});
+els.deleteSelectedBtn.addEventListener('click', () => {
+  if (selected.size === 0) return;
+  entries = entries.filter(e => !selected.has(e.id));
+  selected.clear();
+  render();
+});
+
+/* ---- export CSV ---- */
+function downloadBlob(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(val) {
+  const s = String(val ?? '');
+  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+els.exportCsvBtn.addEventListener('click', () => {
+  const header = ['Handle', 'Link', 'Status', 'Price', 'Notes', 'Last Checked', 'Date Added'];
+  const rows = entries.map(e => [
+    e.handle, e.link, e.status, e.price, e.notes,
+    e.lastCheckedAt.toISOString(), e.addedAt.toISOString()
+  ]);
+  const csv = [header, ...rows].map(r => r.map(csvEscape).join(',')).join('\n');
+  downloadBlob(csv, `chds-acc-checker-${Date.now()}.csv`, 'text/csv');
+});
+
+/* ---- export / import JSON (manual persistence workaround) ---- */
+els.exportJsonBtn.addEventListener('click', () => {
+  const data = entries.map(e => ({
+    ...e,
+    addedAt: e.addedAt.toISOString(),
+    lastCheckedAt: e.lastCheckedAt.toISOString(),
+  }));
+  downloadBlob(JSON.stringify(data, null, 2), `chds-acc-checker-${Date.now()}.json`, 'application/json');
+});
+
+els.importJsonBtn.addEventListener('click', () => els.importFile.click());
+els.importFile.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw new Error('Invalid file');
+      data.forEach(d => {
+        entries.push({
+          id: idCounter++,
+          handle: d.handle || 'unknown',
+          link: d.link || buildLink(d.handle || ''),
+          price: d.price || '',
+          notes: d.notes || '',
+          status: ['live', 'down'].includes(d.status) ? d.status : 'down',
+          addedAt: d.addedAt ? new Date(d.addedAt) : new Date(),
+          lastCheckedAt: d.lastCheckedAt ? new Date(d.lastCheckedAt) : new Date(),
+        });
+      });
+      render();
+    } catch (err) {
+      alert('Could not import that file — make sure it is a JSON export from this tool.');
+    }
+    els.importFile.value = '';
+  };
+  reader.readAsText(file);
+});
+
+render();
+</script>
+
+</body>
+</html>
